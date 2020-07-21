@@ -1,0 +1,67 @@
+#include<stdio.h> 
+#include<stdlib.h>
+int main()
+{    
+    int a[5][5]={17,24,1,8,15,23,5,7,14,16,4,6,13,20,22,10,12,19,21,3,11,18,25,2,9};
+	int i,j,sum,N;
+	N=17+24+1+8+15;
+	for(i=0;i<5;i++)
+	{       
+	    sum=0;//每求一行sum重新置为0 
+		for(j=0;j<5;j++) 
+		{           
+		   sum=sum+a[i][j];     
+        }       
+		if(sum==N)//比较每一行之和是否等于N 
+            continue;//如果是跳过这次循环继续下一次循环
+        else
+		{          
+		   printf("该矩阵不是魔方矩阵！\n");   
+        }   
+	}    
+	for(i=0;i<5;i++)
+	{     sum=0;//每求一列sum重新置为0  
+	      for(j=0;j<5;j++)
+		  {
+		     sum=sum+a[j][i];//比较每一列之和是否等于N
+          }        
+		   if(sum==N)
+		      continue;        
+		   else
+		   {
+		       printf("该矩阵不是魔方矩阵！\n");    
+		   }  
+	}   
+	sum=0;//计算对角线求和前重置为0 
+	for(i=0;i<5;i++)
+	{       
+	    for(j=0;j<5;j++)
+	   {          
+	      if(i==j)               
+	      sum=sum+a[i][j];//计算从左到右对角线的和     
+	   }   
+	}  
+	if(sum!=N)
+	{   
+	    printf("该矩阵不是魔方矩阵！\n");
+	}   
+	sum=0;//计算对角线求和前重置为0 
+	for(i=0;i<5;i++)
+	{       
+	  j=4-i;      
+	  sum=sum+a[i][j];   
+	}   
+	if(sum!=N)
+	{         
+		   printf("该矩阵不是魔方矩阵！\n"); 
+    }    
+	else      
+	   printf("该矩阵是魔方矩阵！\n");  
+	for(i=0;i<5;i++)
+	{
+		for(j=0;j<5;j++)
+		   printf("%d\t",a[i][j]);
+		printf("\n");
+	} 
+    return 0;
+}
