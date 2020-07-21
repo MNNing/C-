@@ -1,0 +1,594 @@
+/*学生信息管理系统
+17080224  孟宁宁
+2017.12.28*/ 
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<conio.h>
+struct DATE//声明用来存储出生日期的结构体
+{
+	int day;
+	int month;
+	int year;
+};
+struct STUDENT//声明用来存储学生的基本信息的结构体
+{
+	long StudentID;//学号 
+	char Name[10];//姓名 
+	char Sex[4];//性别 
+	struct DATE DateofBirth;//结构体嵌套 
+	char Major[20]; //专业 
+	float Gpa;//加权平均分 
+	char PhoneNo[12];//电话号 
+	char E_mailAddress[20];//邮箱地址 
+
+} ;
+struct Link 
+{
+	struct STUDENT student0;
+	struct Link *next;
+	
+};
+
+struct Link * Create_a_student_list(struct Link *head);
+struct Link * Sort_according_to_the_StudentID(struct Link *head);
+struct Link * Insert_a_student (struct Link *head);
+struct Link * Delete_a_student (struct Link *head);
+struct Link * Update_a_student_Info(struct Link *head);
+void Search_a_student(struct Link *head);
+void Display_all_students(struct Link *head);
+void DeleteMemory(struct Link *head);
+int SaveFile(struct Link *head);
+int OpenFile();
+void PrintStInfo(struct Link *pr); 
+void Log_on();
+void PRINT1();
+void PRINT2();
+int main(void)
+{
+	int i=0;
+	struct Link *head=NULL;//指向链表头 
+	Log_on();//Log on with user name and password   
+	PRINT1();//输出Welcome Screen 
+	system("pause");
+	system("cls");
+	do
+	{
+		PRINT2();//输出功能菜单 
+		printf("Please Enter your choice（1~6）：\n");
+		scanf("%d",&i);
+		system("cls");
+		switch(i)
+		{
+			case 1:
+			    head=Create_a_student_list(head);
+				 
+			    break; 
+			case 2:
+				if(head!=NULL)
+				{
+					head=Sort_according_to_the_StudentID(head);
+				}
+				else
+				{
+					printf("请先进行信息录入，即功能1或功能3 ！\n");
+				}
+				break;
+			case 3:
+			    head=Insert_a_student (head);
+			    
+				break;
+			case 4:
+				if(head!=NULL)
+				{
+					head=Delete_a_student (head);
+				}
+				else
+				{
+					printf("请先进行信息录入，即功能1或功能3  ！\n");
+				}
+				break;
+			case 5:
+				if(head!=NULL)
+				{
+					head=Update_a_student_Info(head);
+				}
+				else
+				{
+					printf("请先进行信息录入，即功能1或功能3  ！\n");
+				}
+				
+			    break;
+			case 6:
+				if(head!=NULL)
+				{
+					Search_a_student(head);
+				}
+				else
+				{
+					printf("请先进行信息录入，即功能1或功能3  ！\n");
+				}
+			    
+			    break;  
+			case 7:
+				if(head!=NULL)
+				{
+					Display_all_students(head);
+				}
+				else
+				{
+					printf("请先进行信息录入，即功能1或功能3  ！\n");
+				}
+			    break; 
+			case 8:
+				if(head!=NULL)
+				{
+					SaveFile(head); 
+				}
+				else
+				{
+					printf("请先进行信息录入，即功能1或功能3 ！\n");
+				}
+			    
+				break; 
+			case 9:
+				OpenFile();
+				break;
+			case 10:
+				i=0;//令i=0结束循环，退出程序 
+				break;
+			default:
+				printf("Unknow operator!\n");
+	    }
+	    system("pause");
+	    system("cls");
+	}while(i!=0);
+	DeleteMemory(head);
+	return 0;
+}
+/*函数功能：创建一个学生列表
+函数参数：结构体指针
+函数返回值：结构体指针*/ 
+struct Link *Create_a_student_list(struct Link *head)
+{
+	struct Link *p=NULL;
+	struct Link *pr=head;
+	int n,j; 
+	printf("请输入班级总人数:");
+    scanf("%d",&n);
+	printf("请依次输入学生的信息:\n");
+	for(j=0;j<n;j++)
+	{
+		printf("第%d个人\n",j+1);
+		p=(struct Link *)malloc(sizeof(struct Link));//为新节点申请内存 
+		if(p==NULL)//若申请失败，则输出错误信息，退出程序 
+		{
+			printf("No enough memory to alloc");
+			exit(0);
+			
+		}
+		if(head==NULL)//若原链表为空表，则将新建节点置为首节点 
+		{
+			head=p;
+		}
+		else//若原链表为非空，则将新建节点添加到表尾 
+		{
+			while(pr->next!=NULL)//若未到表尾，则继续移动指针pr，直到pr指向表尾 
+			{
+				pr=pr->next;
+			}
+			pr->next=p;//将新建节点添加到链表的末尾 
+		}
+		pr=p;//让pr指向新建节点 
+		PrintStInfo(pr);//输入节点数据 
+		pr->next=NULL;//将新建节点设置为表尾 
+	}
+	return head;//返回添加节点后的链表的头结点指针 
+}
+/*函数功能：根据学号排序
+函数参数：结构体指针 
+函数返回值：结构体指针*/ 
+struct Link *Sort_according_to_the_StudentID(struct Link *head)
+{
+	struct Link *p=head,*pr=head,*ps=head;//设置三个指向头节点的指针 
+	struct Link *r=NULL;//定义一个中间节点，用于交换两个节点数据 
+	r=(struct Link *)malloc(sizeof(struct Link));//为新节点申请内存 
+	do
+	{
+		for(;p!=NULL;p=p->next)//p向后走 
+		{
+			if(p->student0.StudentID<ps->student0.StudentID)//遇到比ps指向的节点数据小的就让ps指向这个节点 
+			{
+				ps=p;
+				
+			}
+			
+		}//p到达链表尾 
+		r->student0=pr->student0;//pr和ps指向的节点数据交换 
+		pr->student0=ps->student0;
+		ps->student0=r->student0;
+		pr=pr->next;//pr后移 
+		p=pr;
+		ps=pr;
+	}while(pr->next!=NULL);//循环执行上面的步骤，直到pr到链表尾 
+	printf("排序完成！\n");
+	free(r); 
+	return head;
+	
+}
+/*函数功能：插入一个学生的信息
+函数参数：结构体指针 
+函数返回值 :插入节点后的链表的头节点指针*/ 
+struct Link * Insert_a_student (struct Link *head)
+{
+	int i=0;
+	struct Link *pr=head,*p=NULL,*term=NULL;
+	struct Link *s=head;
+	p=(struct Link *)malloc(sizeof(struct Link));//为 新插入的节点申请内存 
+	if(p==NULL)// 如果申请内存失败，则退出程序 
+	{
+		printf("No enough memory to alloc");
+		exit(0);
+			
+	}
+	p->next=NULL;//置新节点的指针域赋为空 
+	printf("请依次输入该学生的信息:\n");
+	PrintStInfo(p);//为新节点数据域赋值 
+	for(;s!=NULL;s=s->next)
+	{
+		if(p->student0.StudentID==s->student0.StudentID)
+		{
+			printf("输入学号已存在！\n");
+			i=1;
+			system("pause");
+			system("cls");
+		
+		}	   
+	}
+	if(i==0)
+	{
+		if(head==NULL)//若原链表为空表，则新插入节点作为首节点 
+		{
+			head=p;
+		}
+		else//若链表为非空， 
+		{
+			while(pr->student0.StudentID<p->student0.StudentID&&pr->next!=NULL)//没有找到待插入的位置，则继续找 
+			{
+				term=pr;
+				pr=pr->next;
+			}
+			if(pr->student0.StudentID>=p->student0.StudentID)
+			{
+				if(pr==head)//在首节点前插入新节点 
+				{
+					p->next=head;
+					head=p;//注意此时链表的头节点指针发生了改变 
+				}
+				else//在链表中插入新节点 
+				{
+					pr=term;
+					p->next=pr->next;//p与pr后面的一个节点连接起来 
+					pr->next=p;//pr与p链接起来 
+				}
+			}
+			else//在表尾插入新节点 
+			{
+				pr->next=p;
+			} 
+			printf("插入成功！\n");
+			
+		}
+	}
+	
+	return head;//返回插入新节点后的链表的头节点指针 
+	
+}
+/*函数功能：删除一个学生的信息
+ 函数参数：结构体指针
+ 函数返回值：删除节点后的链表的头节点指针*/ 
+struct Link * Delete_a_student (struct Link *head)
+{
+	long term;
+	struct Link *p=head,*pr=head;
+	if(head==NULL)//链表为空，没有节点，无法删除节点 
+	{
+		printf("No linked Table!\n");
+		return head;
+	}
+	printf("请输入该学生的ID:");
+	scanf("%ld",&term);
+	
+	while(term!=p->student0.StudentID&&p->next!=NULL)//若没有找到term且未到 表尾，则继续找 
+	{
+		pr=p;
+		p=p->next; 
+	}
+	if(term==p->student0.StudentID)//若找到节点term，则删除该节点 
+	{
+		if(p==head)//若待删除节点为首节点，则让head指向第二个节点 
+		{
+			head=p->next;//注意此时链表的头节点指针发生了改变 
+		}
+		else// 若待删除节点不是首节点，则将前一个节点的指针指向当前节点的下一个节点 
+		{
+			pr->next=p->next;
+		}
+		free(p);//释放为已删除节点 
+	
+	}
+	else//没有找到待删除节点 
+	{
+		printf("This Node has not been found!\n");
+	}
+	return head; //返回删除节点后链表的头节点指针 
+}
+/*函数功能：更新一个学生的信息
+函数参数：结构体指针 
+函数返回值：结构体指针*/ 
+ 
+struct Link * Update_a_student_Info(struct Link *head)
+{
+	struct Link *p=NULL,*pr=head; 
+	p=(struct Link *)malloc(sizeof(struct Link));
+	printf("请依次输入该学生的信息:\n");
+    PrintStInfo(p);//调用函数输入学生信息 
+    while(p->student0.StudentID!=pr->student0.StudentID&&pr->next!=NULL)
+    {
+    	pr=pr->next;
+    }
+    if(p->student0.StudentID==pr->student0.StudentID)
+    {
+    	pr->student0=p->student0;
+    }
+    else
+    {
+    	printf("Can not find this student!\n");
+    }
+	return head;
+}
+/*函数功能：查找一个学生
+函数参数：结构体指针 
+函数返回值：结构体指针*/ 
+void Search_a_student(struct Link *head)
+{
+	struct Link *pr=head;
+	long term;
+	printf("请输入该学生的ID:");
+	scanf("%ld",&term);
+	while(term!=pr->student0.StudentID&&pr->next!=NULL)
+    {
+    	pr=pr->next;
+    }
+    if(term==pr->student0.StudentID)
+    {
+    	printf("ID:%ld\n",pr->student0.StudentID);
+		printf("姓名：%s\n",pr->student0.Name);
+		printf("性别：%s\n",pr->student0.Sex);
+		printf("出生日期：%d.%d.%d\n",pr->student0.DateofBirth.year,
+		        pr->student0.DateofBirth.month,pr->student0.DateofBirth.day);
+		printf("专业：%s\n",pr->student0.Major);
+		printf("加权平均：%.2f\n",pr->student0.Gpa);
+		printf("电话：%s\n",pr->student0.PhoneNo);
+		printf("邮箱地址：%s\n",pr->student0.E_mailAddress);
+    }
+    else
+    {
+    	printf("Can not find this student!\n");
+    }
+	
+} 
+	
+/*函数功能：展示所有学生的信息
+函数参数：结构体指针
+无函数返回值*/ 
+void Display_all_students(struct Link *head)
+{
+	struct Link *st=head;
+	int j=1; 
+	while(st!=NULL)//若不是表尾，则循环输出 
+	{
+		printf("第%d个学生\n",j);
+		printf("ID:%ld\t",st->student0.StudentID);// 
+		printf("姓名：%s\t",st->student0.Name);
+		printf("性别：%s\t",st->student0.Sex);
+		printf("出生日期：%d.%d.%d\t",st->student0.DateofBirth.year,
+		         st->student0.DateofBirth.month,st->student0.DateofBirth.day);
+		printf("专业：%s\t",st->student0.Major);
+		printf("加权平均：%.2f\t",st->student0.Gpa);
+		printf("电话：%s\t",st->student0.PhoneNo);
+		printf("邮箱地址：%s\n",st->student0.E_mailAddress);
+		j++;
+		st=st->next;//让st指向下一个节点 
+	}
+}
+/*函数功能：将学生信息保存到指定文件
+函数参数：结构体指针*/ 
+int SaveFile(struct Link *head)
+{
+	struct Link *st=head;
+	FILE *fp = NULL; //需要注意 
+    fp=fopen("file.txt","w");//文件打开，“w”表示打开只写文件，若文件存在则长度清零，
+	                          //若文件不存在则建立该文件 
+    if (NULL == fp)
+    {
+    	printf("错误！");
+        return -1; // 要返回错误代码 
+    }
+    for(;st!=NULL;st=st->next)
+	{
+		fprintf(fp,"ID:%ld\t",st->student0.StudentID);
+		fprintf(fp,"姓名：%s\t",st->student0.Name);
+		fprintf(fp,"性别：%s\t",st->student0.Sex);
+		fprintf(fp,"出生日期：%d.%d.%d\t",st->student0.DateofBirth.year,
+		          st->student0.DateofBirth.month,st->student0.DateofBirth.day);
+		fprintf(fp,"专业：%s\t",st->student0.Major);
+		fprintf(fp,"加权平均：%.2f\t",st->student0.Gpa);
+		fprintf(fp,"电话：%s\t",st->student0.PhoneNo);
+		fprintf(fp,"邮箱地址：%s\n",st->student0.E_mailAddress);
+	}
+    fclose(fp);
+    fp = NULL; //需要指向空，否则会指向原打开文件地址 
+    printf("保存完成！\n"); 
+    return 0;
+}
+/*函数功能：打开文件
+函数参数：结构体指针*/ 
+int OpenFile()
+{
+	int i;
+	char ch;
+	FILE *fp = NULL; //需要注意 
+    fp=fopen("file.txt","r");
+    if (NULL == fp)
+    {
+    	printf("错误！");
+        return -1; // 要返回错误代码 
+    }
+    while(EOF!=(ch=fgetc(fp)))
+    {
+    	printf("%c", ch); // 在控制台显示该行文字 
+    }
+    fclose(fp);
+    fp = NULL; //需要指向空，否则会指向原打开文件地址 
+    return 0;
+}
+/*函数功能：登陆程序
+无函数参数，无返回值*/ 
+void Log_on()
+{
+	long num1,num2;
+	int j;
+	char a[10],c[10];
+	char b[10];
+	int i;
+	printf("初次登陆，请注册一个账号.\n");
+	printf("请输入用户名(不超过8位)：");
+	scanf("%ld",&num1); 
+	printf("请设置密码(不超过10位)：");
+	for(j=0;j<10;j++)
+	{
+		a[j]=getch();
+		printf("*");
+		if(a[j]=='\r')
+		{
+			a[j]='\0';
+			break;
+		}
+	}
+	printf("\n请再次输入你的密码：\n");
+	for(j=0;j<10;j++)
+	{
+		c[j]=getch();
+		printf("*");
+		if(c[j]=='\r')
+		{
+			c[j]='\0';
+			break;
+		}
+	}
+	while(strcmp(a,c)!=0) 
+	{
+		printf("两次密码输入不一致，请重新输入：\n");
+		printf("请再次输入你的密码：");
+	    scanf("%s",c);
+	}
+	system("pause");
+	system("cls");
+	do
+	{
+		printf("请输入用户名：\n");
+		scanf("%ld",&num2);
+		printf("请输入密码:\n");
+		for(j=0;j<10;j++)
+		{
+			b[j]=getch();
+			printf("*");
+			if(b[j]=='\r')
+			{
+				b[j]='\0';
+				break;
+			}
+		}
+		if(num2==num1&&strcmp(a,b)==0)
+			i=0;
+		else
+		{
+			printf("用户名或密码输入错误！\n");
+			i=1;
+			system("pause");
+			system("cls");
+		}
+	}while(i==1);
+	system("cls");
+	
+}
+/*函数功能：输出 Welcome Screen 
+无函数参数，无返回值*/ 
+void PRINT1()
+{
+	printf("*************************************************\n");
+	printf("*           学生基本信息管理程序                *\n");
+	printf("*                                               *\n");
+	printf("*             Version 2.1                       *\n");
+	printf("*                                               *\n");
+	printf("*       Created By:17080224 孟宁宁              *\n");
+	printf("*                                               *\n");
+	printf("*                    --2017.12.22               *\n");
+	printf("*************************************************\n"); 
+}
+/*函数功能：输出菜单程序
+无函数参数，无返回值*/ 
+void PRINT2()
+{
+	printf("*****************************************************\n");
+	printf("*        1. Create a student list                   *\n");
+	printf("*        2. Sort according to the StudentID         *\n");
+	printf("*        3. Insert a student                        *\n");
+	printf("*        4. Delete a student                        *\n");
+	printf("*        5. Update a student Info                   *\n");
+	printf("*        6. Search a student                        *\n");
+	printf("*        7. Display all students                    *\n");
+	printf("*        8. Save to the file                        *\n");
+	printf("*        9. Open the file                           *\n");
+	printf("*        10.exit                                    *\n");
+	printf("*****************************************************\n");
+	
+} 
+/*函数功能：依次输入学生的信息
+无函数返回值，函数参数：结构体指针 */ 
+void PrintStInfo(struct Link *pr)
+{
+
+	printf("学号：");
+	scanf("%ld",&pr->student0.StudentID); 
+	printf("姓名：");
+	scanf("%s",pr->student0.Name);
+	printf("性别:");
+	scanf("%s",pr->student0.Sex);
+	printf("出生年月日，(eg:1999 07 10):");
+	scanf("%d%d%d",&pr->student0.DateofBirth.year,
+	                &pr->student0.DateofBirth.month,
+		               &pr->student0.DateofBirth.day);
+	printf("专业：");
+	scanf("%s",pr->student0.Major);
+	printf("加权平均分：");
+	scanf("%f",&pr->student0.Gpa);
+	printf("电话：");
+	scanf("%s",pr->student0.PhoneNo);
+	printf("邮箱地址：");
+	scanf("%s",pr->student0.E_mailAddress);
+	
+}  
+/*函数功能：释放head指向的链表中所有节点占用的内存*/ 
+void DeleteMemory(struct Link *head)
+{
+	struct Link *p=head,*pr=NULL;
+	while(p!=NULL)//若不是表尾，则释放节点占用的内存 
+	{
+		pr=p;//在pr中保存当前节点的指针 
+		p=p->next;//让p指向下一个节点 
+		free(pr);//释放pr指向的当前节点占用的内存 
+	}
+}
+
